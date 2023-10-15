@@ -5,88 +5,124 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import tn.esprit.nascar.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
-
-    private lateinit var binding: ActivityMainBinding
-
+    private  lateinit var newRecyclerView : RecyclerView
+    private lateinit var newArrayList: ArrayList<Nascardata>
+    private lateinit var binding : ActivityMainBinding
+     lateinit var imageId:Array<Int>
+     lateinit var titleN:Array<String>
+    lateinit var descrptionN:Array<String>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
+        binding =ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        imageId = arrayOf(
+            R.drawable.ic_event1,
+            R.drawable.ic_event2,
+            R.drawable.ic_event3,
+            R.drawable.ic_event4,
+            R.drawable.ic_news1,
+            R.drawable.ic_news2,
+            R.drawable.ic_news3
 
-        val toolbar = binding.toolbar.id
+
+        )
+        titleN = arrayOf(
+            "wassim 1",
+            "wassim2",
+            "wassim 1",
+            "wassim2",
+            "wassim 1",
+            "wassim2",
+            "wassim 1"
 
 
-        //TODO 11 Bind the toolbar to the activity
-        supportActionBar?.setTitle("Nascar")
+        )
+        descrptionN = arrayOf(
+            "25 mars 2000",
+            "25 mars 2000",
+            "25 mars 2000",
+            "25 mars 2000",
+            "25 mars 2000",
+            "25 mars 2000",
+            "25 mars 2000"
+        )
+       // newRecyclerView = findViewById(R.id.imgNascar)
+        newRecyclerView.layoutManager = LinearLayoutManager(this)
+        newRecyclerView.setHasFixedSize(true)
+        newArrayList = arrayListOf<Nascardata>()
+        getNasacardata()
 
-        setSupportActionBar(binding.toolbar)
-        //TODO 1 Implement the click on the 3 buttons (btnNews|btnEvents|btnProfile) to call changeFragment(...)
-        binding.btnNews.setOnClickListener() {
-            val newsfragment = NewsFragment()
-            changeFragment(newsfragment, "NewsFragment")
+
+
+        val toolbar: Toolbar = binding.toolbar.appBar
+        setSupportActionBar(toolbar)
+
+        binding.btnNews.setOnClickListener {
+            changeFragment(NewsFragment(), "")
         }
-        binding.btnEvents.setOnClickListener() {
-            val eventsfragment = EventsFragment()
-            changeFragment(eventsfragment, "eventsfragment")
-        }
-        binding.btnProfile.setOnClickListener() {
-            val newsfragment = NewsFragment()
-            changeFragment(newsfragment, "profilefragment")
+
+        binding.btnEvents.setOnClickListener {
+            changeFragment(EventsFragment(), "")
         }
 
-        //TODO 2 Implement the first call of the first fragment
-        if (savedInstanceState == null) {
-            val intiaFragment = NewsFragment()
-            changeFragment(intiaFragment, "ProfileFragment")
+        binding.btnProfile.setOnClickListener {
+            changeFragment(ProfileFragment(), "")
         }
+
+        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, NewsFragment()).commit()
+    }
+    private fun getNasacardata(){
+            for(i in imageId.indices){
+                val nasdata = Nascardata(imageId[i],titleN[i],descrptionN[i] )
+                newArrayList.add(nasdata)
+
+            }
+        newRecyclerView.adapter = RecycleNascar(newArrayList )
     }
 
-    private fun changeFragment(fragment: Fragment, tag: String) {
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.replace(binding.fragmentContainer.id, fragment)
+    private fun changeFragment(fragment: Fragment, name: String) {
 
+        if (name.isEmpty())
+            supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
+        else
+            supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).addToBackStack("").commit()
 
-
-        transaction.commit()
     }
 
-    //TODO 12 Override the method onCreateOptionsMenu()
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_toolbar, menu)
-        return true
+        return super.onCreateOptionsMenu(menu)
     }
 
-    //TODO 13 Override the method onOptionsItemSelected() and Implement info and logout behavior
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_info -> {
-                val aboutfragment = AboutFragment()
-                changeFragment(aboutfragment, "aboutfragment")
 
+        when(item.itemId){
+            R.id.infoMenu -> {
+                changeFragment(AboutFragment(),"AboutMe")
             }
-
-            R.id.logoutMenu -> {
-                val alertDialogBuilder = AlertDialog.Builder(this)
-                alertDialogBuilder.setTitle("Logout")
-                alertDialogBuilder.setMessage("Are you sure you want to log out ?")
-                alertDialogBuilder.setPositiveButton("Oui") { dialog, _ ->
+            R.id.logoutMenu ->{
+                val builder = AlertDialog.Builder(this)
+                builder.setTitle("Logout")
+                builder.setMessage("Are you sure you want to logout ?")
+                builder.setPositiveButton("Yes"){ dialogInterface, which ->
                     finish()
                 }
-                alertDialogBuilder.setNegativeButton("Non") { dialog, _ ->
-                    dialog.dismiss()
+                builder.setNegativeButton("No"){dialogInterface, which ->
+                    dialogInterface.dismiss()
                 }
-                val alertDialog = alertDialogBuilder.create()
-                alertDialog.show()
+                builder.create().show()
             }
         }
+
         return super.onOptionsItemSelected(item)
     }
+
 }
-
-
-
